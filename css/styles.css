@@ -52,6 +52,7 @@ article, aside, canvas, details, figcaption, figure, footer, header, hgroup, men
   padding: 25px;
   text-align: center;
   text-transform: uppercase;
+  box-sizing: border-box;
 }
 /* ====================== Navigation ====================== */
 nav {
@@ -112,9 +113,10 @@ nav h1 a {
 /* ====================== Restaurant Filtering ====================== */
 .filter-options {
   width: 100%;
-  height: 50px;
+  height: 70px;
   background-color: #3397DB;
   align-items: center;
+  align-content: center;
 }
 .filter-options h2 {
   color: white;
@@ -153,6 +155,7 @@ nav h1 a {
   flex-wrap: wrap;
   justify-content: center;
   width: 100%;
+  box-sizing: border-box;
   
 }
 #restaurants-list li {
@@ -163,15 +166,17 @@ nav h1 a {
   min-height: 380px;
   padding: 25px 30px 25px;
   text-align: center;
-  width: 270px;
+  width: 90%;
+  box-sizing: border-box;
 }
+
 #restaurants-list .restaurant-img {
   background-color: #ccc;
   display: block;
   margin: 0;
   max-width: 100%;
-  min-height: 248px;
-  min-width: 100%;
+  min-height: 30%;
+  min-width: 50%;
 }
 #restaurants-list li h1 {
   color: #f18200;
@@ -199,7 +204,18 @@ nav h1 a {
   text-decoration: none;
   text-transform: uppercase;
 }
-
+@media screen and (min-width: 730px) {
+  #restaurants-list li {
+    width:270px;
+    box-sizing: content-box;
+  }
+}
+@media screen and (min-width: 1200px) {
+  #maincontent, header, footer {
+    max-width: 1280px;
+    margin: auto;
+  }
+}
 /* ====================== Restaurant Details ====================== */
 .inside header {
   position: fixed;
