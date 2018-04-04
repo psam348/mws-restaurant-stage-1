@@ -60,7 +60,7 @@ article, aside, canvas, details, figcaption, figure, footer, header, hgroup, men
 /* ====================== Navigation ====================== */
 nav {
   width: 100%;
-  height: 80px;
+  height: 60px;
   background-color: #252831;
   text-align:center;
 }
@@ -253,7 +253,7 @@ nav h1 a {
 }
 .inside #map-container {
   background: blue none repeat scroll 0 0;
-  height: 200px;
+  height: 30vh;
   /* position: relative; */
   right: 0;
   top: 80px;
@@ -310,10 +310,10 @@ nav h1 a {
   position: relative;
 
 }
-#reviews-container {
+/* #reviews-container {
   padding: 30px 40px 80px;
   
-}
+} */
 #reviews-container h2 {
   color: #f58500;
   font-size: 24pt;
@@ -343,4 +343,26 @@ nav h1 a {
 }
 #restaurant-hours td {
   color: #666;
+}
+
+@media screen and (min-width: 640px) {
+  .inside #map-container {
+    width: 50%;
+    height: 80vh;
+    order: 2;
+  }
+  #restaurant-container {
+    width: 50%;
+    order: 1;
+  }
+  #reviews-container {
+    width: 100%;
+    order: 3; 
+  }
+  #reviews-list li {
+    width: 33%;
+    display: inline-block;
+    vertical-align: top;
+    /* margin: 0 15px 30px ; */
+  }
 }
