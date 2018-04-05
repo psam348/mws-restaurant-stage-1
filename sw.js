@@ -61,3 +61,5 @@ self.addEventListener('fetch', function(event) {
         })
       );
   });
+
+  // code derived from https://developers.google.com/web/fundamentals/primers/service-workers/#cache_and_return_requests
