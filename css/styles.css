@@ -234,12 +234,12 @@ nav h1 a {
   }
 }
 /* remove for use of all screen */
-/* @media screen and (min-width: 1300px) {
+@media screen and (min-width: 1300px) {
   #maincontent, header, footer {
     max-width: 1370px;
     margin: auto;
   }
-} */
+}
 /* ====================== Restaurant Details ====================== */
 .inside header {
   position: sticky;
