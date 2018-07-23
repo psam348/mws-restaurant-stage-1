@@ -6,6 +6,7 @@ var eslint = require('gulp-eslint');
 // var jasmine = require('gulp-jasmine-phantom');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
+let cleanCSS = require('gulp-clean-css');
 
 gulp.task('scripts', function() {
 	return gulp.src('js/**/*.js')
@@ -36,12 +37,9 @@ gulp.task('copy-images', function() {
 });
 
 gulp.task('styles', function() {
-	return gulp.src('css/**/*.css')
-		.pipe(autoprefixer({
-			browsers: ['last 2 versions']
-		}))
-		.pipe(gulp.dest('dist/css'))
-        .pipe(browserSync.stream());   
+	return gulp.src('css/*.css')
+    .pipe(cleanCSS({compatibility: 'ie8'}))
+    .pipe(gulp.dest('dist/css')); 
 });
 
 var reload = browserSync.reload;
