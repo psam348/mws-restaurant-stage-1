@@ -1,4 +1,5 @@
 var gulp = require('gulp');
+var babel = require('gulp-babel');
 // var sass = require('gulp-sass');
 var autoprefixer = require('gulp-autoprefixer');
 var browserSync = require('browser-sync');
@@ -7,10 +8,13 @@ var eslint = require('gulp-eslint');
 var concat = require('gulp-concat');
 var uglify = require('gulp-uglify');
 let cleanCSS = require('gulp-clean-css');
+var htmlmin = require('gulp-htmlmin');
+const imagemin = require('gulp-imagemin');
 
 gulp.task('scripts', function() {
 	return gulp.src('js/**/*.js')
-		.pipe(concat('all.js'))
+        .pipe(concat('all.js'))
+        .pipe(babel())
         .pipe(gulp.dest('dist/js'));
 });
 
@@ -21,18 +25,21 @@ gulp.task('sw', function() {
 
 gulp.task('scripts-dist', function() {
 	return gulp.src('js/**/*.js')
-		.pipe(concat('all.js'))
+        .pipe(concat('all.js'))
+        .pipe(babel())
 		.pipe(uglify())
         .pipe(gulp.dest('dist/js'));
 });
 
 gulp.task('copy-html', function() {
-	return gulp.src('./*.html')
+    return gulp.src('./*.html')
+        .pipe(htmlmin({collapseWhitespace: true}))
         .pipe(gulp.dest('./dist'));
 });
 
 gulp.task('copy-images', function() {
-	return gulp.src('img/*')
+    return gulp.src('img/*')
+        .pipe(imagemin([imagemin.jpegtran({progressive: true})]))
         .pipe(gulp.dest('dist/img'));
 });
 
@@ -42,18 +49,35 @@ gulp.task('styles', function() {
     .pipe(gulp.dest('dist/css')); 
 });
 
-var reload = browserSync.reload;
+gulp.task('distri', gulp.series([
+	'copy-html',
+	'copy-images',
+	'styles',
+	'scripts'
+]));
 
-// watch files for changes and reload
-gulp.task('serve', function() {
-  browserSync({
-    server: {
-      baseDir: 'dist'
-    }
-  });
+const server = browserSync.create();
 
-  gulp.watch(['*.html', 'css/**/*.css', 'js/**/*.js'], {cwd: 'dist'}, reload);
-});
+function reload(done) {
+    server.reload();
+    done();
+  }
+  
+function serve(done) {
+    server.init({
+      server: {
+        baseDir: 'dist'
+      }
+    });
+    done();
+  }
+const watch = () => gulp.watch(['*.html', 'css/**/*.css', 'js/**/*.js'], gulp.series('distri',reload));
+
+gulp.task('serve', gulp.series(serve, watch));
+
+gulp.task('server',serve);
+
+gulp.task('default',gulp.series('distri','server'));
 
 // gulp.task('lint', function () {
 // 	return gulp.src(['js/**/*.js'])
@@ -79,9 +103,3 @@ gulp.task('serve', function() {
 // 	});
 // });
 
-// gulp.task('dist', [
-// 	'copy-html',
-// 	'copy-images',
-// 	'styles',
-// 	'scripts-dist'
-// ]);
