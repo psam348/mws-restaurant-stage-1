@@ -12,16 +12,13 @@ class DBHelper {
     return `http://localhost:${port}/restaurants`;
   }
 
-  
-  
-
   /**
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback,id) {
     //let xhr = new XMLHttpRequest();
     let urlToFetch;
-    var dbPromise = idb.open('restdb', 1,function(upgradeDb) {
+    var dbPromise = idb.open('restdb', 3,function(upgradeDb) {
       console.log('making a new object store');
       if (!upgradeDb.objectStoreNames.contains('restauList')) {
         upgradeDb.createObjectStore('restauList');
@@ -44,6 +41,7 @@ class DBHelper {
             console.log('restaurants', restaurant)
           });
         })
+
         callback(null, restaurants);
       })
     })
