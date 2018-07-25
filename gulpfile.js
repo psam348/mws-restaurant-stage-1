@@ -11,16 +11,17 @@ let cleanCSS = require('gulp-clean-css');
 var htmlmin = require('gulp-htmlmin');
 // const imagemin = require('gulp-imagemin');
 const webp = require('gulp-webp');
+// var browserify = require('gulp-browserify');
 
 gulp.task('scripts', function() {
 	return gulp.src('js/**/*.js')
-        .pipe(babel())    
+        // .pipe(babel())    
         .pipe(concat('all.js'))    
         .pipe(gulp.dest('dist/js'));
 });
 
 gulp.task('sw', function() {
-	return gulp.src('sw.js')
+    return gulp.src('sw.js')
         .pipe(gulp.dest('dist'));
 });
 
@@ -59,6 +60,14 @@ gulp.task('distri', gulp.series([
     'sw'
 ]));
 
+gulp.task('fordist', gulp.series([
+	'copy-html',
+	'copy-images',
+	'styles',
+    'scripts-dist',
+    'sw'
+]));
+
 const server = browserSync.create();
 
 function reload(done) {
@@ -76,11 +85,11 @@ function serve(done) {
   }
 const watch = () => gulp.watch(['*.html', '*.js', 'css/**/*.css', 'js/**/*.js'], gulp.series('distri',reload));
 
-gulp.task('serve', gulp.series(serve, watch));
+gulp.task('serve', gulp.series('distri',serve, watch));
 
 gulp.task('server',serve);
 
-gulp.task('default',gulp.series('distri','server'));
+gulp.task('default',gulp.series('fordist','server'));
 
 // gulp.task('lint', function () {
 // 	return gulp.src(['js/**/*.js'])

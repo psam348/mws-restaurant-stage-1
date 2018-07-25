@@ -8,30 +8,48 @@ class DBHelper {
    * Change this to restaurants.json file location on your server.
    */
   static get DATABASE_URL() {
-    const port = 1337; // Change this to your server port
+    const port = 1337 // Change this to your server port
     return `http://localhost:${port}/restaurants`;
   }
+
+  
+  
 
   /**
    * Fetch all restaurants.
    */
-  static fetchRestaurants(callback, id) {
+  static fetchRestaurants(callback,id) {
     //let xhr = new XMLHttpRequest();
     let urlToFetch;
+    var dbPromise = idb.open('restdb', 1,function(upgradeDb) {
+      console.log('making a new object store');
+      if (!upgradeDb.objectStoreNames.contains('restauList')) {
+        upgradeDb.createObjectStore('restauList');
+      }});
 
-    if (!id) {
-      urlToFetch = this.DATABASE_URL;
-    } else {
-      urlToFetch = this.DATABASE_URL + "/" + id;
+    if (!id){
+      urlToFetch= this.DATABASE_URL;
+    }else{
+      urlToFetch= this.DATABASE_URL + "/" + id;
     }
     // console.log(urlToFetch);
     fetch(urlToFetch).then(response => {
-      response.json().then(restaurants => {
+      response.json().then(restaurants=>{
+        console.log(restaurants)
+        dbPromise.then(db=>{
+          var transaction = db.transaction(['restauList'], 'readwrite');
+          var store = transaction.objectStore('restauList');
+          restaurants.forEach(function (restaurant) {
+            store.put(restaurant);
+            console.log('restaurants', restaurant)
+          });
+        })
         callback(null, restaurants);
-      });
-    }).catch(error => {
+      })
+    })
+    .catch(error => {
       callback(`Request failed. Returned status of ${error}`, null);
-    });
+    })
 
     // xhr.open('GET', DBHelper.DATABASE_URL);
     // xhr.onload = () => {
@@ -46,22 +64,21 @@ class DBHelper {
     // };
     // xhr.send();
   }
-
+  
   /**
    * Fetch a restaurant by its ID.
    */
   static fetchRestaurantById(id, callback) {
     // fetch all restaurants with proper error handling.
+
     DBHelper.fetchRestaurants((error, restaurants) => {
       if (error) {
         callback(error, null);
       } else {
         const restaurant = restaurants.find(r => r.id == id);
-        if (restaurant) {
-          // Got the restaurant
+        if (restaurant) { // Got the restaurant
           callback(null, restaurant);
-        } else {
-          // Restaurant does not exist in the database
+        } else { // Restaurant does not exist in the database
           callback('Restaurant does not exist', null);
         }
       }
@@ -109,13 +126,11 @@ class DBHelper {
       if (error) {
         callback(error, null);
       } else {
-        let results = restaurants;
-        if (cuisine != 'all') {
-          // filter by cuisine
+        let results = restaurants
+        if (cuisine != 'all') { // filter by cuisine
           results = results.filter(r => r.cuisine_type == cuisine);
         }
-        if (neighborhood != 'all') {
-          // filter by neighborhood
+        if (neighborhood != 'all') { // filter by neighborhood
           results = results.filter(r => r.neighborhood == neighborhood);
         }
         callback(null, results);
@@ -133,9 +148,9 @@ class DBHelper {
         callback(error, null);
       } else {
         // Get all neighborhoods from all restaurants
-        const neighborhoods = restaurants.map((v, i) => restaurants[i].neighborhood);
+        const neighborhoods = restaurants.map((v, i) => restaurants[i].neighborhood)
         // Remove duplicates from neighborhoods
-        const uniqueNeighborhoods = neighborhoods.filter((v, i) => neighborhoods.indexOf(v) == i);
+        const uniqueNeighborhoods = neighborhoods.filter((v, i) => neighborhoods.indexOf(v) == i)
         callback(null, uniqueNeighborhoods);
       }
     });
@@ -151,9 +166,9 @@ class DBHelper {
         callback(error, null);
       } else {
         // Get all cuisines from all restaurants
-        const cuisines = restaurants.map((v, i) => restaurants[i].cuisine_type);
+        const cuisines = restaurants.map((v, i) => restaurants[i].cuisine_type)
         // Remove duplicates from cuisines
-        const uniqueCuisines = cuisines.filter((v, i) => cuisines.indexOf(v) == i);
+        const uniqueCuisines = cuisines.filter((v, i) => cuisines.indexOf(v) == i)
         callback(null, uniqueCuisines);
       }
     });
@@ -163,14 +178,14 @@ class DBHelper {
    * Restaurant page URL.
    */
   static urlForRestaurant(restaurant) {
-    return `./restaurant.html?id=${restaurant.id}`;
+    return (`./restaurant.html?id=${restaurant.id}`);
   }
 
   /**
    * Restaurant image URL.
    */
   static imageUrlForRestaurant(restaurant) {
-    return `/img/${restaurant.id}.webp`;
+    return (`/img/${restaurant.id}.webp`);
   }
 
   /**
@@ -182,21 +197,25 @@ class DBHelper {
       title: restaurant.name,
       url: DBHelper.urlForRestaurant(restaurant),
       map: map,
-      animation: google.maps.Animation.DROP });
+      animation: google.maps.Animation.DROP}
+    );
     return marker;
   }
 
 }
-let restaurants, neighborhoods, cuisines;
-var map;
-var markers = [];
+
+let restaurants,
+  neighborhoods,
+  cuisines
+var map
+var markers = []
 // Register service worker
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', function () {
-    navigator.serviceWorker.register('/sw.js').then(function (registration) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js').then(function(registration) {
       // Registration was successful
       console.log('ServiceWorker registration successful with scope: ', registration.scope);
-    }, function (err) {
+    }, function(err) {
       // registration failed :(
       console.log('ServiceWorker registration failed: ', err);
     });
@@ -206,7 +225,7 @@ if ('serviceWorker' in navigator) {
 /**
  * Fetch neighborhoods and cuisines as soon as the page is loaded.
  */
-document.addEventListener('DOMContentLoaded', event => {
+document.addEventListener('DOMContentLoaded', (event) => {
   fetchNeighborhoods();
   fetchCuisines();
 });
@@ -216,15 +235,14 @@ document.addEventListener('DOMContentLoaded', event => {
  */
 fetchNeighborhoods = () => {
   DBHelper.fetchNeighborhoods((error, neighborhoods) => {
-    if (error) {
-      // Got an error
+    if (error) { // Got an error
       console.error(error);
     } else {
       self.neighborhoods = neighborhoods;
       fillNeighborhoodsHTML();
     }
   });
-};
+}
 
 /**
  * Set neighborhoods HTML.
@@ -237,22 +255,21 @@ fillNeighborhoodsHTML = (neighborhoods = self.neighborhoods) => {
     option.value = neighborhood;
     select.append(option);
   });
-};
+}
 
 /**
  * Fetch all cuisines and set their HTML.
  */
 fetchCuisines = () => {
   DBHelper.fetchCuisines((error, cuisines) => {
-    if (error) {
-      // Got an error!
+    if (error) { // Got an error!
       console.error(error);
     } else {
       self.cuisines = cuisines;
       fillCuisinesHTML();
     }
   });
-};
+}
 
 /**
  * Set cuisines HTML.
@@ -266,7 +283,7 @@ fillCuisinesHTML = (cuisines = self.cuisines) => {
     option.value = cuisine;
     select.append(option);
   });
-};
+}
 
 /**
  * Initialize Google map, called from HTML.
@@ -282,7 +299,7 @@ window.initMap = () => {
     scrollwheel: false
   });
   updateRestaurants();
-};
+}
 
 /**
  * Update page and map for current restaurants.
@@ -298,20 +315,19 @@ updateRestaurants = () => {
   const neighborhood = nSelect[nIndex].value;
 
   DBHelper.fetchRestaurantByCuisineAndNeighborhood(cuisine, neighborhood, (error, restaurants) => {
-    if (error) {
-      // Got an error!
+    if (error) { // Got an error!
       console.error(error);
     } else {
       resetRestaurants(restaurants);
       fillRestaurantsHTML();
     }
-  });
-};
+  })
+}
 
 /**
  * Clear current restaurants, their HTML and remove their map markers.
  */
-resetRestaurants = restaurants => {
+resetRestaurants = (restaurants) => {
   // Remove all restaurants
   self.restaurants = [];
   const ul = document.getElementById('restaurants-list');
@@ -321,7 +337,7 @@ resetRestaurants = restaurants => {
   self.markers.forEach(m => m.setMap(null));
   self.markers = [];
   self.restaurants = restaurants;
-};
+}
 
 /**
  * Create all restaurants HTML and add them to the webpage.
@@ -332,12 +348,12 @@ fillRestaurantsHTML = (restaurants = self.restaurants) => {
     ul.append(createRestaurantHTML(restaurant));
   });
   addMarkersToMap();
-};
+}
 
 /**
  * Create restaurant HTML.
  */
-createRestaurantHTML = restaurant => {
+createRestaurantHTML = (restaurant) => {
   const li = document.createElement('li');
 
   const image = document.createElement('img');
@@ -361,10 +377,10 @@ createRestaurantHTML = restaurant => {
   const more = document.createElement('a');
   more.innerHTML = 'View Details';
   more.href = DBHelper.urlForRestaurant(restaurant);
-  li.append(more);
+  li.append(more)
 
-  return li;
-};
+  return li
+}
 
 /**
  * Add markers for current restaurants to the map.
@@ -374,11 +390,12 @@ addMarkersToMap = (restaurants = self.restaurants) => {
     // Add marker to the map
     const marker = DBHelper.mapMarkerForRestaurant(restaurant, self.map);
     google.maps.event.addListener(marker, 'click', () => {
-      window.location.href = marker.url;
+      window.location.href = marker.url
     });
     self.markers.push(marker);
   });
-};
+}
+
 let restaurant;
 // var map;
 // Register service worker
@@ -398,8 +415,7 @@ let restaurant;
  */
 window.initMap2 = () => {
   fetchRestaurantFromURL((error, restaurant) => {
-    if (error) {
-      // Got an error!
+    if (error) { // Got an error!
       console.error(error);
     } else {
       self.map = new google.maps.Map(document.getElementById('map'), {
@@ -411,21 +427,19 @@ window.initMap2 = () => {
       DBHelper.mapMarkerForRestaurant(self.restaurant, self.map);
     }
   });
-};
+}
 
 /**
  * Get current restaurant from page URL.
  */
-fetchRestaurantFromURL = callback => {
-  if (self.restaurant) {
-    // restaurant already fetched!
-    callback(null, self.restaurant);
+fetchRestaurantFromURL = (callback) => {
+  if (self.restaurant) { // restaurant already fetched!
+    callback(null, self.restaurant)
     return;
   }
   const id = getParameterByName('id');
-  if (!id) {
-    // no id found in URL
-    error = 'No restaurant id in URL';
+  if (!id) { // no id found in URL
+    error = 'No restaurant id in URL'
     callback(error, null);
   } else {
     DBHelper.fetchRestaurantById(id, (error, restaurant) => {
@@ -435,10 +449,10 @@ fetchRestaurantFromURL = callback => {
         return;
       }
       fillRestaurantHTML();
-      callback(null, restaurant);
+      callback(null, restaurant)
     });
   }
-};
+}
 
 /**
  * Create restaurant HTML and add it to the webpage
@@ -451,7 +465,7 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   address.innerHTML = restaurant.address;
 
   const image = document.getElementById('restaurant-img');
-  image.className = 'restaurant-img';
+  image.className = 'restaurant-img'
   image.alt = `Image of ${restaurant.name} Restaurant`;
   image.src = DBHelper.imageUrlForRestaurant(restaurant);
 
@@ -464,7 +478,7 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
   }
   // fill reviews
   fillReviewsHTML();
-};
+}
 
 /**
  * Create restaurant operating hours HTML table and add it to the webpage.
@@ -484,7 +498,7 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
 
     hours.appendChild(row);
   }
-};
+}
 
 /**
  * Create all reviews HTML and add them to the webpage.
@@ -506,12 +520,12 @@ fillReviewsHTML = (reviews = self.restaurant.reviews) => {
     ul.appendChild(createReviewHTML(review));
   });
   container.appendChild(ul);
-};
+}
 
 /**
  * Create review HTML and add it to the webpage.
  */
-createReviewHTML = review => {
+createReviewHTML = (review) => {
   const li = document.createElement('li');
   const name = document.createElement('p');
   name.innerHTML = review.name;
@@ -530,27 +544,30 @@ createReviewHTML = review => {
   li.appendChild(comments);
 
   return li;
-};
+}
 
 /**
  * Add restaurant name to the breadcrumb navigation menu
  */
-fillBreadcrumb = (restaurant = self.restaurant) => {
+fillBreadcrumb = (restaurant=self.restaurant) => {
   const breadcrumb = document.getElementById('breadcrumb');
   const li = document.createElement('li');
   li.innerHTML = restaurant.name;
   breadcrumb.appendChild(li);
-};
+}
 
 /**
  * Get a parameter by name from page URL.
  */
 getParameterByName = (name, url) => {
-  if (!url) url = window.location.href;
+  if (!url)
+    url = window.location.href;
   name = name.replace(/[\[\]]/g, '\\$&');
   const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`),
-        results = regex.exec(url);
-  if (!results) return null;
-  if (!results[2]) return '';
+    results = regex.exec(url);
+  if (!results)
+    return null;
+  if (!results[2])
+    return '';
   return decodeURIComponent(results[2].replace(/\+/g, ' '));
-};
+}

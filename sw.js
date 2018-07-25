@@ -1,5 +1,3 @@
-import idb from "idb";
-
 var CACHE_NAME = 'my-site-cache-v2';
 var urlsToCache = [
   '/',
@@ -18,7 +16,6 @@ self.addEventListener('install', function(event) {
       })
   );
 });
-
 
 self.addEventListener('fetch', function(event) {
   // for Restaurant.html
@@ -72,3 +69,5 @@ self.addEventListener('fetch', function(event) {
   });
 
   // code derived from https://developers.google.com/web/fundamentals/primers/service-workers/#cache_and_return_requests
+
+  // idb

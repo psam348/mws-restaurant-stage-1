@@ -12,13 +12,21 @@ class DBHelper {
     return `http://localhost:${port}/restaurants`;
   }
 
+  
+  
+
   /**
    * Fetch all restaurants.
    */
   static fetchRestaurants(callback,id) {
     //let xhr = new XMLHttpRequest();
     let urlToFetch;
-    
+    var dbPromise = idb.open('restdb', 1,function(upgradeDb) {
+      console.log('making a new object store');
+      if (!upgradeDb.objectStoreNames.contains('restauList')) {
+        upgradeDb.createObjectStore('restauList');
+      }});
+
     if (!id){
       urlToFetch= this.DATABASE_URL;
     }else{
@@ -27,6 +35,15 @@ class DBHelper {
     // console.log(urlToFetch);
     fetch(urlToFetch).then(response => {
       response.json().then(restaurants=>{
+        console.log(restaurants)
+        dbPromise.then(db=>{
+          var transaction = db.transaction(['restauList'], 'readwrite');
+          var store = transaction.objectStore('restauList');
+          restaurants.forEach(function (restaurant) {
+            store.put(restaurant);
+            console.log('restaurants', restaurant)
+          });
+        })
         callback(null, restaurants);
       })
     })
@@ -47,12 +64,13 @@ class DBHelper {
     // };
     // xhr.send();
   }
-
+  
   /**
    * Fetch a restaurant by its ID.
    */
   static fetchRestaurantById(id, callback) {
     // fetch all restaurants with proper error handling.
+
     DBHelper.fetchRestaurants((error, restaurants) => {
       if (error) {
         callback(error, null);
