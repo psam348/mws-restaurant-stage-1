@@ -39,7 +39,7 @@ class DBHelper {
     fetch(urlToFetch).then(response => {
       console.log(response);
       response.json().then(restaurants=>{
-        console.log(restaurants)
+        // console.log(restaurants)
         dbPromise.then(db=>{
           var transaction = db.transaction(['restauList'], 'readwrite');
           var store = transaction.objectStore('restauList');
@@ -51,37 +51,31 @@ class DBHelper {
               // restaurant.id
             );
           })
-          // let data= store.getAll().then(elements => {
-          //   console.log(elements);
-          //   return elements;
-          // });;
-          //   console.log(data);
-          //   return data;
         })
-        // return data
-        // callback(null, restaurants);
       })
     })
     .catch(error => {
       callback(`Request failed. Returned status of ${error}`, null);
     })
   }
-static dbretrieve(){
-  const dbPromise = this.openDatabase();
-  return dbPromise.then(db=>{
-    var transaction = db.transaction(['restauList'], 'readwrite');
-    var store = transaction.objectStore('restauList');
-    let data= store.getAll().then(elements => {
-      console.log(elements);
-      return elements;
-    });;
-      console.log(data);
-      return data;
-  });
-}
-
-  static fetchRestaurants(callback) {
+  static dbretrieve(){
+    const dbPromise = this.openDatabase();
+    return dbPromise.then(db=>{
+      var transaction = db.transaction(['restauList'], 'readwrite');
+      var store = transaction.objectStore('restauList');
+      let data= store.getAll().then(elements => {
+        console.log(elements);
+        return elements;
+      });;
+        console.log(data);
+        return data;
+    });
+  }
+  static fetchData(){
     this.dbstore();
+  }
+  static fetchRestaurants(callback) {
+    
     // var test2=this.dbstore();
     // console.log(test2);
     // callback(null, test2);
@@ -175,6 +169,7 @@ static dbretrieve(){
    */
   static fetchNeighborhoods(callback) {
     // Fetch all restaurants
+    this.fetchData();
     DBHelper.fetchRestaurants((error, restaurants) => {
       if (error) {
         callback(error, null);
