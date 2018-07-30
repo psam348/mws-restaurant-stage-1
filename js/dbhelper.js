@@ -1,6 +1,7 @@
 /**
  * Common database helper functions.
  */
+
 class DBHelper {
 
   /**
@@ -11,56 +12,89 @@ class DBHelper {
     const port = 1337 // Change this to your server port
     return `http://localhost:${port}/restaurants`;
   }
-
+  static openDatabase() {
+    
+    return idb.open('restdb', 3,function(upgradeDb) {
+      console.log('making a new object store');
+      if (!upgradeDb.objectStoreNames.contains('restauList')) {
+        upgradeDb.createObjectStore('restauList', {
+          keyPath: 'id'
+        });
+      }});
+  }
+  
   /**
    * Fetch all restaurants.
    */
-  static fetchRestaurants(callback,id) {
-    //let xhr = new XMLHttpRequest();
+  static dbstore(){
     let urlToFetch;
-    var dbPromise = idb.open('restdb', 3,function(upgradeDb) {
-      console.log('making a new object store');
-      if (!upgradeDb.objectStoreNames.contains('restauList')) {
-        upgradeDb.createObjectStore('restauList');
-      }});
-
-    if (!id){
-      urlToFetch= this.DATABASE_URL;
-    }else{
-      urlToFetch= this.DATABASE_URL + "/" + id;
-    }
+    const dbPromise = this.openDatabase();
+    // console.log(dbPromise);
+    // if (!id){
+    urlToFetch= this.DATABASE_URL;
+    // }else{
+    //   urlToFetch= this.DATABASE_URL + "/" + id;
+    // }
     // console.log(urlToFetch);
     fetch(urlToFetch).then(response => {
+      console.log(response);
       response.json().then(restaurants=>{
         console.log(restaurants)
         dbPromise.then(db=>{
           var transaction = db.transaction(['restauList'], 'readwrite');
           var store = transaction.objectStore('restauList');
+          // store.put('test','foo');
           restaurants.forEach(function (restaurant) {
-            store.put(restaurant);
-            console.log('restaurants', restaurant)
-          });
+            // console.log(restaurant.id);
+            store.put(
+              restaurant
+              // restaurant.id
+            );
+          })
+          // let data= store.getAll().then(elements => {
+          //   console.log(elements);
+          //   return elements;
+          // });;
+          //   console.log(data);
+          //   return data;
         })
-
-        callback(null, restaurants);
+        // return data
+        // callback(null, restaurants);
       })
     })
     .catch(error => {
       callback(`Request failed. Returned status of ${error}`, null);
     })
+  }
+static dbretrieve(){
+  const dbPromise = this.openDatabase();
+  return dbPromise.then(db=>{
+    var transaction = db.transaction(['restauList'], 'readwrite');
+    var store = transaction.objectStore('restauList');
+    let data= store.getAll().then(elements => {
+      console.log(elements);
+      return elements;
+    });;
+      console.log(data);
+      return data;
+  });
+}
 
-    // xhr.open('GET', DBHelper.DATABASE_URL);
-    // xhr.onload = () => {
-    //   if (xhr.status === 200) { // Got a success response from server!
-    //     const json = JSON.parse(xhr.responseText);
-    //     const restaurants = json;
-    //     callback(null, restaurants);
-    //   } else { // Oops!. Got an error from server.
-    //     const error = (`Request failed. Returned status of ${xhr.status}`);
-    //     callback(error, null);
-    //   }
-    // };
-    // xhr.send();
+  static fetchRestaurants(callback) {
+    this.dbstore();
+    // var test2=this.dbstore();
+    // console.log(test2);
+    // callback(null, test2);
+    let cachedData = this.dbretrieve();
+    console.log(cachedData);
+    // callback(null, cachedData);
+    cachedData.then(data => {
+    //  check if the data is available
+    if (data) {
+        callback(null, data);
+    } 
+    });
+
   }
   
   /**
