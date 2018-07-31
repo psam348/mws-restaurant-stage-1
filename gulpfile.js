@@ -25,6 +25,11 @@ gulp.task('sw', function() {
         .pipe(gulp.dest('dist'));
 });
 
+gulp.task('manifest', function() {
+    return gulp.src('manifest.json')
+        .pipe(gulp.dest('dist'));
+});
+
 gulp.task('scripts-dist', function() {
 	return gulp.src('js/**/*.js')
         .pipe(babel({
@@ -46,6 +51,11 @@ gulp.task('copy-images', function() {
         .pipe(gulp.dest('dist/img'));
 });
 
+gulp.task('copy-icon', function() {
+    return gulp.src('img/*.png')
+        .pipe(gulp.dest('dist/img'));
+});
+
 gulp.task('styles', function() {
 	return gulp.src('css/*.css')
     .pipe(cleanCSS({compatibility: 'ie8'}))
@@ -54,18 +64,22 @@ gulp.task('styles', function() {
 
 gulp.task('distri', gulp.series([
 	'copy-html',
-	'copy-images',
+    'copy-images',
+    'copy-icon',
 	'styles',
     'scripts',
-    'sw'
+    'sw',
+    'manifest'
 ]));
 
 gulp.task('fordist', gulp.series([
 	'copy-html',
-	'copy-images',
+    'copy-images',
+    'copy-icon',
 	'styles',
     'scripts-dist',
-    'sw'
+    'sw',
+    'manifest'
 ]));
 
 const server = browserSync.create();
@@ -83,7 +97,7 @@ function serve(done) {
     });
     done();
   }
-const watch = () => gulp.watch(['*.html', '*.js', 'css/**/*.css', 'js/**/*.js'], gulp.series('distri',reload));
+const watch = () => gulp.watch(['*.html', '*.js', '*.json', 'css/**/*.css', 'js/**/*.js'], gulp.series('distri',reload));
 
 gulp.task('serve', gulp.series('distri',serve, watch));
 
