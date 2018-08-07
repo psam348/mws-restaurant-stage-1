@@ -1,4 +1,5 @@
 let restaurant;
+let reviews;
 // var map;
 // Register service worker
 // if ('serviceWorker' in navigator) {
@@ -44,8 +45,10 @@ fetchRestaurantFromURL = (callback) => {
     error = 'No restaurant id in URL'
     callback(error, null);
   } else {
-    DBHelper.fetchRestaurantById(id, (error, restaurant) => {
+    DBHelper.fetchRestaurantById(id, (error, restaurant, reviews) => {
       self.restaurant = restaurant;
+      self.reviews = reviews;
+      console.log("var",restaurant,reviews);
       if (!restaurant) {
         console.error(error);
         return;
@@ -109,11 +112,17 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
 /**
  * Create all reviews HTML and add them to the webpage.
  */
-fillReviewsHTML = (reviews = self.restaurant.reviews) => {
+fillReviewsHTML = (reviews=self.reviews) => {
+  console.log("reviews in info",reviews)
   const container = document.getElementById('reviews-container');
   const title = document.createElement('h3');
   title.innerHTML = 'Reviews';
   container.appendChild(title);
+
+  // add reviews
+  const ulRev = document.getElementById('reviews-add');
+  ulRev.innerHTML= createFormReview();
+  container.appendChild(ulRev);
 
   if (!reviews) {
     const noReviews = document.createElement('p');
@@ -138,7 +147,8 @@ createReviewHTML = (review) => {
   li.appendChild(name);
 
   const date = document.createElement('p');
-  date.innerHTML = review.date;
+  let rdate = new Date(review.createdAt);
+  date.innerHTML = rdate;
   li.appendChild(date);
 
   const rating = document.createElement('p');
@@ -152,6 +162,32 @@ createReviewHTML = (review) => {
   return li;
 }
 
+// create form to add review
+createFormReview = ()=>{
+  let form = `
+    <form id="review-add">
+    <label for="Reviewer">Your Name : </label>
+    <input id="Reviewer" name="name" type="text"/>
+    <div> 
+      <p>Your Ratings : 
+      <select name="Ratings">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+      </select></p>
+    </div>
+    <label for="review-comments">Your Comments : </label>
+    <br>
+    <textarea id="review-comments" name="comments"></textarea>
+    <br>
+    <button class="submit-form" onclick="addReview()">Post Review!</button>
+    </form>
+  `
+  console.log(form);
+  return form
+}
 /**
  * Add restaurant name to the breadcrumb navigation menu
  */

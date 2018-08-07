@@ -12,15 +12,26 @@ class DBHelper {
     const port = 1337 // Change this to your server port
     return `http://localhost:${port}/restaurants`;
   }
+  static get DATABASE_URL_REVIEWS() {
+    const port = 1337 // Change this to your server port
+    return `http://localhost:${port}/reviews`;
+  }
   static openDatabase() {
     
-    return idb.open('restdb', 3,function(upgradeDb) {
+    return idb.open('restdb', 5,function(upgradeDb) {
       console.log('making a new object store');
       if (!upgradeDb.objectStoreNames.contains('restauList')) {
         upgradeDb.createObjectStore('restauList', {
           keyPath: 'id'
         });
-      }});
+      }
+      if (!upgradeDb.objectStoreNames.contains('reviewsList')) {
+        var reviewStore=upgradeDb.createObjectStore('reviewsList', {
+          keyPath: 'id'
+        });
+        // reviewStore.createIndex('restaurant_id','restaurant_id');
+      }
+    });
   }
   
   /**
@@ -37,7 +48,7 @@ class DBHelper {
     // }
     // console.log(urlToFetch);
     fetch(urlToFetch).then(response => {
-      console.log(response);
+      // console.log(response);
       response.json().then(restaurants=>{
         // console.log(restaurants)
         dbPromise.then(db=>{
@@ -58,21 +69,72 @@ class DBHelper {
       callback(`Request failed. Returned status of ${error}`, null);
     })
   }
+  static dbstoreReviews(){
+    let urlToFetch;
+    const dbPromise = this.openDatabase();
+    // console.log(dbPromise);
+    // if (!id){
+    urlToFetch= this.DATABASE_URL_REVIEWS;
+    // }else{
+    //   urlToFetch= this.DATABASE_URL + "/" + id;
+    // }
+    // console.log(urlToFetch);
+    fetch(urlToFetch).then(response => {
+      // console.log(response);
+      response.json().then(reviews=>{
+        // console.log(reviews)
+        dbPromise.then(db=>{
+          var transaction = db.transaction(['reviewsList'], 'readwrite');
+          var store = transaction.objectStore('reviewsList');
+          // store.put('test','foo');
+          reviews.forEach(function (review) {
+            // console.log(review.id);
+            store.put(
+              review
+              // restaurant.id
+            );
+          })
+        })
+      })
+    })
+    .catch(error => {
+      callback(`Request failed. Returned status of ${error}`, null);
+    })
+  }
   static dbretrieve(){
     const dbPromise = this.openDatabase();
     return dbPromise.then(db=>{
       var transaction = db.transaction(['restauList'], 'readwrite');
       var store = transaction.objectStore('restauList');
       let data= store.getAll().then(elements => {
-        console.log(elements);
+        // console.log(elements);
+        return elements;
+      });;
+        // console.log(data);
+        return data;
+    });
+  }
+
+  static dbretrieveReviews(){
+    const dbPromise = this.openDatabase();
+    return dbPromise.then(db=>{
+      var transaction = db.transaction(['reviewsList'], 'readwrite');
+      var store = transaction.objectStore('reviewsList');
+      // console.log(store.indexNames);
+      // var storeIndex = store.index('restaurant_id');
+      let data= store.getAll().then(elements => {
+        // console.log(elements);
         return elements;
       });;
         console.log(data);
         return data;
     });
   }
+
+
   static fetchData(){
     this.dbstore();
+    this.dbstoreReviews();
   }
   static fetchRestaurants(callback) {
     
@@ -80,7 +142,7 @@ class DBHelper {
     // console.log(test2);
     // callback(null, test2);
     let cachedData = this.dbretrieve();
-    console.log(cachedData);
+    // console.log(cachedData);
     // callback(null, cachedData);
     cachedData.then(data => {
     //  check if the data is available
@@ -90,7 +152,31 @@ class DBHelper {
     });
 
   }
-  
+  static fetchReviews(restaurant, callback) {
+    
+    // var test2=this.dbstore();
+    // console.log(test2);
+    // callback(null, test2);
+    let cachedData = this.dbretrieveReviews().then(allreviews=>{
+      let reviewslist=[];
+      allreviews.forEach(review => {
+        if (review.restaurant_id === restaurant.id){
+          reviewslist.push(review);
+        }
+      });
+      console.log("selected reviews",reviewslist);
+      return reviewslist;
+    });
+    console.log("fetchreviews",cachedData);
+    // callback(null, cachedData);
+    cachedData.then(data => {
+    //  check if the data is available
+    if (data) {
+        callback(null, data);
+    } 
+    });
+
+  }
   /**
    * Fetch a restaurant by its ID.
    */
@@ -102,8 +188,35 @@ class DBHelper {
         callback(error, null);
       } else {
         const restaurant = restaurants.find(r => r.id == id);
+        
         if (restaurant) { // Got the restaurant
-          callback(null, restaurant);
+          let restReviews = this.fetchReviews(restaurant,(error,reviews)=>{
+            if (error) {
+              callback(error, null);
+            } else {
+            // let reviewslist=[];
+            // reviews.forEach(review => {
+            //   if (review.restaurant_id === restaurant.id){
+            //     reviewslist.push(review);
+            //   }
+            // });
+            // console.log("selected reviews",reviewslist);
+            // return reviewslist;
+            callback(null, restaurant, reviews);
+            }
+          });
+          // console.log("restReviews",restReviews);
+          // reviews = restReviews.then(data => {
+          //   //  check if the data is available
+          //   if (data) {
+          //     console.log("data",data);
+          //     return data;
+          //   } 
+          //   });
+          // console.log("test",reviews);
+          // console.log("test2",restaurant);
+          
+          // callback(null, restaurant, reviews);
         } else { // Restaurant does not exist in the database
           callback('Restaurant does not exist', null);
         }
