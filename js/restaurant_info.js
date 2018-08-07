@@ -120,9 +120,9 @@ fillReviewsHTML = (reviews=self.reviews) => {
   container.appendChild(title);
 
   // add reviews
-  const ulRev = document.getElementById('reviews-add');
-  ulRev.innerHTML= createFormReview();
-  container.appendChild(ulRev);
+  const pRev = document.getElementById('reviews-add');
+  pRev.innerHTML= createFormReview();
+  container.appendChild(pRev);
 
   if (!reviews) {
     const noReviews = document.createElement('p');
@@ -146,11 +146,6 @@ createReviewHTML = (review) => {
   name.innerHTML = review.name;
   li.appendChild(name);
 
-  const date = document.createElement('p');
-  let rdate = new Date(review.createdAt);
-  date.innerHTML = rdate;
-  li.appendChild(date);
-
   const rating = document.createElement('p');
   rating.innerHTML = `Rating: ${review.rating}`;
   li.appendChild(rating);
@@ -158,6 +153,11 @@ createReviewHTML = (review) => {
   const comments = document.createElement('p');
   comments.innerHTML = review.comments;
   li.appendChild(comments);
+
+  const date = document.createElement('p');
+  let rdate = new Date(review.createdAt);
+  date.innerHTML = rdate;
+  li.appendChild(date);
 
   return li;
 }
@@ -170,7 +170,7 @@ createFormReview = ()=>{
     <input id="Reviewer" name="name" type="text"/>
     <div> 
       <p>Your Ratings : 
-      <select name="Ratings">
+      <select aria-label="Rating selection" id="ratings" name="Ratings">
         <option value="1">1</option>
         <option value="2">2</option>
         <option value="3">3</option>
