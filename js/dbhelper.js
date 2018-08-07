@@ -138,12 +138,9 @@ class DBHelper {
   }
   static fetchRestaurants(callback) {
     
-    // var test2=this.dbstore();
-    // console.log(test2);
-    // callback(null, test2);
     let cachedData = this.dbretrieve();
     // console.log(cachedData);
-    // callback(null, cachedData);
+    
     cachedData.then(data => {
     //  check if the data is available
     if (data) {
@@ -154,9 +151,6 @@ class DBHelper {
   }
   static fetchReviews(restaurant, callback) {
     
-    // var test2=this.dbstore();
-    // console.log(test2);
-    // callback(null, test2);
     let cachedData = this.dbretrieveReviews().then(allreviews=>{
       let reviewslist=[];
       allreviews.forEach(review => {
@@ -168,7 +162,7 @@ class DBHelper {
       return reviewslist;
     });
     console.log("fetchreviews",cachedData);
-    // callback(null, cachedData);
+    
     cachedData.then(data => {
     //  check if the data is available
     if (data) {
@@ -194,29 +188,10 @@ class DBHelper {
             if (error) {
               callback(error, null);
             } else {
-            // let reviewslist=[];
-            // reviews.forEach(review => {
-            //   if (review.restaurant_id === restaurant.id){
-            //     reviewslist.push(review);
-            //   }
-            // });
-            // console.log("selected reviews",reviewslist);
-            // return reviewslist;
             callback(null, restaurant, reviews);
             }
           });
-          // console.log("restReviews",restReviews);
-          // reviews = restReviews.then(data => {
-          //   //  check if the data is available
-          //   if (data) {
-          //     console.log("data",data);
-          //     return data;
-          //   } 
-          //   });
-          // console.log("test",reviews);
-          // console.log("test2",restaurant);
           
-          // callback(null, restaurant, reviews);
         } else { // Restaurant does not exist in the database
           callback('Restaurant does not exist', null);
         }
