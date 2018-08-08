@@ -153,7 +153,26 @@ createRestaurantHTML = (restaurant) => {
   const image = document.createElement('img');
   image.className = 'restaurant-img';
   image.alt = `Image of ${restaurant.name} Restaurant`;
-  image.src = DBHelper.imageUrlForRestaurant(restaurant);
+
+  let observer;
+  if ('IntersectionObserver' in window){
+    observer = new IntersectionObserver(onVisible, {threshold:0.2});
+    observer.observe(image);
+  }else{
+    loadImg(image);
+  }
+
+  let loadImg= (image) => {
+    image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  }
+  function onVisible(changes, observer){
+    changes.forEach(change=>{
+      if (change.intersectionRatio > 0){
+        loadImg(change.target);
+        observer.unobserve(change.target);
+      }
+    });
+  }
   li.append(image);
 
   const name = document.createElement('h2');

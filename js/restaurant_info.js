@@ -222,11 +222,25 @@ addReview= ()=>{
     "restaurant_id": rest_id,
     "name": name,
     "rating": rating,
-    "comments": comments
+    "comments": comments,
+    "createdAt": new Date()
   }
   console.log(reviewObject);
-  DBHelper.addReview(reviewObject);
-  fillRestaurantHTML();
+  let status=DBHelper.addReview(reviewObject);
+  console.log(status);
+  document.getElementById("review-add").reset();
+
+  const container = document.getElementById('reviews-container');
+  const ul = document.getElementById('reviews-list');
+  if (status==="offline"){
+    const offmessage = document.createElement('p');
+    offmessage.innerHTML = `Offline reviews`;
+    ul.appendChild(offmessage);
+  }
+  ul.appendChild(createReviewHTML(reviewObject));
+  
+  container.appendChild(ul);
+  
 
 }
 /**

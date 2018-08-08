@@ -185,6 +185,10 @@ class DBHelper {
 
   static addReview(review){
     // console.log("in db review",review);
+    if (!navigator.onLine){
+      DBHelper.localStoreoffline(review);
+      return "offline";
+    }
     let urlToFetch;
     urlToFetch= `${this.DATABASE_URL_REVIEWS}/`
     fetch(urlToFetch,{
@@ -198,6 +202,23 @@ class DBHelper {
     });
   }
 
+  static localStoreoffline(review){
+
+    console.log(review);
+    let key= "data";
+    localStorage.setItem( key, JSON.stringify(review));
+    window.addEventListener("online",(event)=>{
+      let reviewStored= JSON.parse(localStorage.getItem(key));
+      console.log(reviewStored);
+      if (reviewStored!==null){
+        DBHelper.addReview(reviewStored);
+        localStorage.removeItem(key);
+        window.location.reload();
+      } 
+      
+
+    })
+  }
   /**
    * Fetch a restaurant by its ID.
    */
@@ -818,7 +839,26 @@ createRestaurantHTML = (restaurant) => {
   const image = document.createElement('img');
   image.className = 'restaurant-img';
   image.alt = `Image of ${restaurant.name} Restaurant`;
-  image.src = DBHelper.imageUrlForRestaurant(restaurant);
+
+  let observer;
+  if ('IntersectionObserver' in window){
+    observer = new IntersectionObserver(onVisible, {threshold:0.2});
+    observer.observe(image);
+  }else{
+    loadImg(image);
+  }
+
+  let loadImg= (image) => {
+    image.src = DBHelper.imageUrlForRestaurant(restaurant);
+  }
+  function onVisible(changes, observer){
+    changes.forEach(change=>{
+      if (change.intersectionRatio > 0){
+        loadImg(change.target);
+        observer.unobserve(change.target);
+      }
+    });
+  }
   li.append(image);
 
   const name = document.createElement('h2');
@@ -1103,11 +1143,25 @@ addReview= ()=>{
     "restaurant_id": rest_id,
     "name": name,
     "rating": rating,
-    "comments": comments
+    "comments": comments,
+    "createdAt": new Date()
   }
   console.log(reviewObject);
-  DBHelper.addReview(reviewObject);
-  fillRestaurantHTML();
+  let status=DBHelper.addReview(reviewObject);
+  console.log(status);
+  document.getElementById("review-add").reset();
+
+  const container = document.getElementById('reviews-container');
+  const ul = document.getElementById('reviews-list');
+  if (status==="offline"){
+    const offmessage = document.createElement('p');
+    offmessage.innerHTML = `Offline reviews`;
+    ul.appendChild(offmessage);
+  }
+  ul.appendChild(createReviewHTML(reviewObject));
+  
+  container.appendChild(ul);
+  
 
 }
 /**
