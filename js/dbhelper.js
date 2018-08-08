@@ -171,6 +171,16 @@ class DBHelper {
     });
 
   }
+
+  static changeFavStatus(id,favStatus){
+    console.log("Restaurant id:",id,"fav state:",favStatus);
+    let urlToFetch;
+    urlToFetch= `${this.DATABASE_URL}/${id}/?is_favorite=${favStatus}`
+    fetch(urlToFetch,{method:'PUT'}).then(()=>{
+      this.dbstore();
+    }
+    );
+  }
   /**
    * Fetch a restaurant by its ID.
    */
@@ -184,7 +194,7 @@ class DBHelper {
         const restaurant = restaurants.find(r => r.id == id);
         
         if (restaurant) { // Got the restaurant
-          let restReviews = this.fetchReviews(restaurant,(error,reviews)=>{
+          this.fetchReviews(restaurant,(error,reviews)=>{
             if (error) {
               callback(error, null);
             } else {

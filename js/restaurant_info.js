@@ -68,7 +68,26 @@ fillRestaurantHTML = (restaurant = self.restaurant) => {
 
   const favorite = document.getElementById('restaurant-favorite');
   favorite.innerHTML = '❤';
-  // li.append(favorite);
+  favorite.classList.add("favorite_btn");
+  if (restaurant.is_favorite){
+    favorite.classList.add("favorite");
+    favorite.setAttribute("aria-label","favorite");
+  }else{
+    favorite.classList.remove("favorite");
+    favorite.setAttribute("aria-label","not a favorite");
+  }
+  favorite.onclick= ()=> {
+    let favStatus= !restaurant.is_favorite;
+    DBHelper.changeFavStatus(restaurant.id,favStatus);
+    if (favStatus){
+      favorite.classList.add("favorite");
+      favorite.setAttribute("aria-label","favorite");
+    }else{
+      favorite.classList.remove("favorite");
+      favorite.setAttribute("aria-label","not a favorite");
+    }
+    restaurant.is_favorite = !restaurant.is_favorite;
+  }
 
   const address = document.getElementById('restaurant-address');
   address.innerHTML = restaurant.address;

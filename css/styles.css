@@ -208,6 +208,15 @@ nav h1 a {
   margin: 20px 0 10px;
   text-transform: uppercase;
 }
+.favorite_btn {
+  color: white;
+  font-size: 14pt;
+  text-align: right;
+}
+.favorite {
+  color: red;
+}
+
 #restaurants-list p {
   margin: 0;
   font-size: 11pt;
