@@ -1060,9 +1060,9 @@ fillReviewsHTML = (reviews=self.reviews) => {
   container.appendChild(title);
 
   // add reviews
-  const pRev = document.getElementById('reviews-add');
-  pRev.innerHTML= createFormReview();
-  container.appendChild(pRev);
+  // const pRev = document.getElementById('reviews-add');
+  // pRev.innerHTML= createFormReview();
+  // container.appendChild(pRev);
 
   if (!reviews) {
     const noReviews = document.createElement('p');
@@ -1071,6 +1071,9 @@ fillReviewsHTML = (reviews=self.reviews) => {
     return;
   }
   const ul = document.getElementById('reviews-list');
+  const li = document.createElement('li');
+  li.innerHTML = createFormReview();
+  ul.appendChild(li);
   reviews.forEach(review => {
     ul.appendChild(createReviewHTML(review));
   });
@@ -1105,9 +1108,13 @@ createReviewHTML = (review) => {
 // create form to add review
 createFormReview = ()=>{
   let form = `
+    <h4> Add your own Review </h4>
     <form id="review-add">
+    <div>
     <label for="Reviewer">Your Name : </label>
     <input id="Reviewer" name="name" type="text"/>
+    </div>
+    <p></p>
     <div> 
       <p>Your Ratings : 
       <select aria-label="Rating selection" id="ratings" name="Ratings">
