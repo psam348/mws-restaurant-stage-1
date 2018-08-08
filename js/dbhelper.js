@@ -69,15 +69,16 @@ class DBHelper {
       callback(`Request failed. Returned status of ${error}`, null);
     })
   }
-  static dbstoreReviews(){
+  static dbstoreReviews(restaurant_id){
     let urlToFetch;
     const dbPromise = this.openDatabase();
     // console.log(dbPromise);
     // if (!id){
-    urlToFetch= this.DATABASE_URL_REVIEWS;
-    // }else{
-    //   urlToFetch= this.DATABASE_URL + "/" + id;
-    // }
+    if (!restaurant_id){
+      urlToFetch= this.DATABASE_URL_REVIEWS;
+    }else{
+      urlToFetch= this.DATABASE_URL_REVIEWS + "/?restaurant_id=" + restaurant_id;
+    }
     // console.log(urlToFetch);
     fetch(urlToFetch).then(response => {
       // console.log(response);
@@ -158,10 +159,10 @@ class DBHelper {
           reviewslist.push(review);
         }
       });
-      console.log("selected reviews",reviewslist);
+      // console.log("selected reviews",reviewslist);
       return reviewslist;
     });
-    console.log("fetchreviews",cachedData);
+    // console.log("fetchreviews",cachedData);
     
     cachedData.then(data => {
     //  check if the data is available
@@ -173,7 +174,7 @@ class DBHelper {
   }
 
   static changeFavStatus(id,favStatus){
-    console.log("Restaurant id:",id,"fav state:",favStatus);
+    // console.log("Restaurant id:",id,"fav state:",favStatus);
     let urlToFetch;
     urlToFetch= `${this.DATABASE_URL}/${id}/?is_favorite=${favStatus}`
     fetch(urlToFetch,{method:'PUT'}).then(()=>{
@@ -181,6 +182,22 @@ class DBHelper {
     }
     );
   }
+
+  static addReview(review){
+    // console.log("in db review",review);
+    let urlToFetch;
+    urlToFetch= `${this.DATABASE_URL_REVIEWS}/`
+    fetch(urlToFetch,{
+      method:'POST',
+      headers: new Headers({"Content-Type":"application/json"}), 
+      body:JSON.stringify(review)}).then(()=>{
+      this.dbstoreReviews(review.restaurant_id);
+    }
+    ).catch(error => {
+      callback(`Request failed. Returned status of ${error}`, null);
+    });
+  }
+
   /**
    * Fetch a restaurant by its ID.
    */

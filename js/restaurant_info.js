@@ -48,7 +48,7 @@ fetchRestaurantFromURL = (callback) => {
     DBHelper.fetchRestaurantById(id, (error, restaurant, reviews) => {
       self.restaurant = restaurant;
       self.reviews = reviews;
-      console.log("var",restaurant,reviews);
+      // console.log("var",restaurant,reviews);
       if (!restaurant) {
         console.error(error);
         return;
@@ -132,7 +132,7 @@ fillRestaurantHoursHTML = (operatingHours = self.restaurant.operating_hours) => 
  * Create all reviews HTML and add them to the webpage.
  */
 fillReviewsHTML = (reviews=self.reviews) => {
-  console.log("reviews in info",reviews)
+  // console.log("reviews in info",reviews)
   const container = document.getElementById('reviews-container');
   const title = document.createElement('h3');
   title.innerHTML = 'Reviews';
@@ -204,8 +204,30 @@ createFormReview = ()=>{
     <button class="submit-form" onclick="addReview()">Post Review!</button>
     </form>
   `
-  console.log(form);
+  // console.log(form);
   return form
+}
+
+addReview= ()=>{
+  event.preventDefault();
+  // data from form
+  let rest_id = self.restaurant.id;
+  let name = document.getElementById("Reviewer").value;
+  let rating = document.querySelector("#ratings option:checked").value;
+  let comments = document.getElementById("review-comments").value;
+  // console.log(rest_id,name,rating,comments);
+
+  // create review object
+  let reviewObject = {
+    "restaurant_id": rest_id,
+    "name": name,
+    "rating": rating,
+    "comments": comments
+  }
+  console.log(reviewObject);
+  DBHelper.addReview(reviewObject);
+  fillRestaurantHTML();
+
 }
 /**
  * Add restaurant name to the breadcrumb navigation menu
