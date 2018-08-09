@@ -103,7 +103,7 @@ gulp.task('serve', gulp.series('distri',serve, watch));
 
 gulp.task('server',serve);
 
-gulp.task('default',gulp.series('fordist','server'));
+gulp.task('default',gulp.series('distri','server'));
 
 // gulp.task('lint', function () {
 // 	return gulp.src(['js/**/*.js'])
